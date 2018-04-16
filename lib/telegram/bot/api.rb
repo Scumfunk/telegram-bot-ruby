@@ -109,9 +109,12 @@ module Telegram
       end
 
       def conn
-        @conn ||= Faraday.new(url: 'https://api.telegram.org') do |faraday|
+        @conn ||= Faraday.new(url: 'https://api.telegram.org', ssl: {verify:false}) do |faraday|
           faraday.request :multipart
           faraday.request :url_encoded
+          if ENV['TELEGRAM_PROXY']
+            faraday.proxy ENV['TELEGRAM_PROXY']
+          end
           faraday.adapter Telegram::Bot.configuration.adapter
         end
       end

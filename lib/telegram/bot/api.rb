@@ -69,7 +69,7 @@ module Telegram
 
       def call(endpoint, raw_params = {})
         params = build_params(raw_params)
-        response = conn.post("/bot#{token}/#{endpoint}", params)
+        response = conn.post("/bot#{token}/#{endpoint}", params.to_json)
         if response.status == 200
           JSON.parse(response.body)
         else
@@ -109,13 +109,51 @@ module Telegram
       end
 
       def conn
-        @conn ||= Faraday.new(url: 'https://api.telegram.org', ssl: {verify:false}) do |faraday|
+        @conn ||=
+          if ENV['TELEGRAM_HTTP_PROXY']
+            set_http_proxy_connection
+          elsif ENV['TELEGRAM_SOCKS5_PROXY']
+            set_socks5_connection
+          else
+            set_default_connection
+          end
+      end
+
+      def set_http_proxy_connection
+        Faraday.new(url: 'https://api.telegram.org', ssl: {verify:false}) do |faraday|
           faraday.request :multipart
           faraday.request :url_encoded
-          if ENV['TELEGRAM_PROXY']
-            faraday.proxy ENV['TELEGRAM_PROXY']
-          end
           faraday.adapter Telegram::Bot.configuration.adapter
+          faraday.proxy ENV['TELEGRAM_HTTP_PROXY']
+        end
+      end
+
+      def set_default_connection
+        Faraday.new(url: 'https://api.telegram.org', ssl: {verify:false}) do |faraday|
+          faraday.request :multipart
+          faraday.request :url_encoded
+          faraday.adapter Telegram::Bot.configuration.adapter
+        end
+      end
+
+      def set_socks5_connection
+        require 'telegram/bot/adapters/socks5'
+
+        proxy_opts = {
+            uri: URI.parse(ENV['TELEGRAM_SOCKS5_PROXY']),
+            user: ENV['TELEGRAM_PROXY_USER'],
+            password: ENV['TELEGRAM_PROXY_PASSWORD'],
+            socks: true
+        }
+
+        Faraday.new(url: 'https://api.telegram.org',
+                                 ssl: {verify:false},
+                                 request: { proxy: proxy_opts }) do |c|
+          c.request :multipart
+          c.request :url_encoded
+          c.headers['Content-Type'] = 'application/json'
+          Faraday::Adapter.register_middleware socks5: Telegram::Bot::Adapters::Socks5
+          c.adapter :socks5
         end
       end
     end

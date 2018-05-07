@@ -1,11 +1,6 @@
 # telegram-bot-ruby
 
-Ruby wrapper for [Telegram's Bot API](https://core.telegram.org/bots/api).
-
-[![Gem Version](https://badge.fury.io/rb/telegram-bot-ruby.svg)](http://badge.fury.io/rb/telegram-bot-ruby)
-[![Maintainability](https://api.codeclimate.com/v1/badges/7e61fbf5bec86e118fb1/maintainability)](https://codeclimate.com/github/atipugin/telegram-bot-ruby/maintainability)
-[![Build Status](https://travis-ci.org/atipugin/telegram-bot-ruby.svg?branch=master)](https://travis-ci.org/atipugin/telegram-bot-ruby)
-[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks!-🦉-1EAEDB.svg)](https://saythanks.io/to/atipugin)
+Ruby wrapper for [Telegram's Bot API](https://core.telegram.org/bots/api) updated to work with HTTP or SOCKS5 proxy.
 
 ## Installation
 
@@ -182,6 +177,23 @@ Telegram::Bot.configure do |config|
   config.adapter = :net_http_persistent
 end
 ```
+
+## Proxy
+
+For using HTTP proxy set up env-variable TELEGRAM_PROXY like:
+
+```
+TELEGRAM_HTTP_PROXY='https://0.0.0.0:0000'
+```
+
+If you prefer to use SOCKS5, just set up next variables:
+
+```
+TELEGRAM_SOCKS5_PROXY='https://0.0.0.0:0000'
+TELEGRAM_PROXY_USER=user
+TELEGRAM_PROXY_PASSWORD=password
+```
+
 
 ## Boilerplates
 

@@ -1,6 +1,5 @@
 require 'socksify'
 require 'socksify/http'
-require 'awesome_print'
 
 module Telegram
   module Bot
